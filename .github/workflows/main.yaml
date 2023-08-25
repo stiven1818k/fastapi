@@ -12,7 +12,7 @@ env:
 
 jobs:
   build-and-publish:
-      runs-on: ubuntu-ubuntu-latest
+      runs-on: "ubuntu-latest"
       steps:
         - name: checkout
           uses: actions/checkout@v3
@@ -29,6 +29,7 @@ jobs:
 
         - name: Unit test
           run: python -m unittest discover tests
+
         - name: SonarAnalisys
           uses: SonarSource/sonarcloud-github-action@master
           env:
@@ -39,7 +40,7 @@ jobs:
           run: echo "$REGISTRY_PASS" | docker login -u "$REGISTRY_USER" --password-stdin
         
         - name: Build & push to Registry
-        - run: |
+          run: |
             docker build -t $NAME_DOCKER .
             docker tag NAME_DOCKER $REGISTRY_USER/$NAME_DOCKER
             docker push NAME_DOCKER $REGISTRY_USER/$NAME_DOCKER
