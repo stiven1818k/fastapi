@@ -1,0 +1,46 @@
+name: GitHub Actions Pipeline for Api
+run-name: ${{ github.actor }} is building the API 🚀
+on: 
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY_USER: ${{secrets.REGISTRY_USER}}
+  REGISTRY_PASS: ${{secrets.REGISTRY_PASS}}
+  NAME_DOCKER: fast-api
+
+jobs:
+  build-and-publish:
+      runs-on: ubuntu-ubuntu-latest
+      steps:
+        - name: checkout
+          uses: actions/checkout@v3
+          with:
+            fetch-depth: 0
+
+        - name: Python
+          uses: actions/setup-python@v2
+          with:
+            python-version: 3.9
+
+        - name: dependecy
+          run: pip install -r requirements.txt
+
+        - name: Unit test
+          run: python -m unittest discover tests
+        - name: SonarAnalisys
+          uses: SonarSource/sonarcloud-github-action@master
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  
+        - name: Registry
+          run: echo "$REGISTRY_PASS" | docker login -u "$REGISTRY_USER" --password-stdin
+        
+        - name: Build & push to Registry
+        - run: |
+            docker build -t $NAME_DOCKER .
+            docker tag NAME_DOCKER $REGISTRY_USER/$NAME_DOCKER
+            docker push NAME_DOCKER $REGISTRY_USER/$NAME_DOCKER
+
